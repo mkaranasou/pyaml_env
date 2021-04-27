@@ -206,10 +206,11 @@ if __name__ == '__main__':
 
 
 Then you can run the above script:
-
+```bash
 python use_env_variables_in_config_example.py -c /path/to/yaml
+```
 
-And in your code, do stuff with conf, e.g. access the database password like this: conf['database']['DB_PASS']
+And in your code, do stuff with conf, e.g. access the database password like this: `conf['database']['DB_PASS']`
 
 I hope this was helpful. Any thoughts, questions, corrections and suggestions are very welcome :)
 
