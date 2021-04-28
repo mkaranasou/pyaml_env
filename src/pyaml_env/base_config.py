@@ -13,6 +13,13 @@ class BaseConfig:
         self._is_validated = False
         self._is_valid = False
         self._errors = []
+        self.__dict__ = self.__handle_inner_structures()
+
+    def __handle_inner_structures(self):
+        for k, v in self.__dict__.items():
+            if isinstance(v, dict):
+                self.__dict__[k] = BaseConfig(v)
+        return self.__dict__
 
     @property
     def errors(self):
