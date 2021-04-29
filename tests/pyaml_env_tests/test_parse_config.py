@@ -221,3 +221,43 @@ class TestParseConfig(unittest.TestCase):
             config,
             expected_config
         )
+
+    def test_parse_config_default_separator_strong_password(self):
+        test_data = '''
+        test1:
+            data0: !TEST ${ENV_TAG1:NoHtnnmEuluGp2boPvGQkGrXqTAtBvIVz9VRmV65}/somethingelse/${ENV_TAG2}
+            data1:  !TEST ${ENV_TAG2:0.0.0.0}
+        '''
+        config = parse_config(data=test_data, tag='!TEST', default_sep=':')
+
+        expected_config = {
+            'test1': {
+                'data0': 'NoHtnnmEuluGp2boPvGQkGrXqTAtBvIVz9VRmV65/somethingelse/N/A',
+                'data1': '0.0.0.0'
+            }
+        }
+
+        self.assertDictEqual(
+            config,
+            expected_config
+        )
+
+    def test_parse_config_default_separator_var_chars(self):
+        test_data = '''
+        test1:
+            data0: !TEST ${ENV_TAG1:35xV*+/\gPEFGxrg}/somethingelse/${ENV_TAG2}
+            data1:  !TEST ${ENV_TAG2:0.0.0.0}
+        '''
+        config = parse_config(data=test_data, tag='!TEST', default_sep=':')
+
+        expected_config = {
+            'test1': {
+                'data0': '35xV*+/\gPEFGxrg/somethingelse/N/A',
+                'data1': '0.0.0.0'
+            }
+        }
+
+        self.assertDictEqual(
+            config,
+            expected_config
+        )
