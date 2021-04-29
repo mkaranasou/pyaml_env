@@ -1,3 +1,6 @@
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Downloads](https://pepy.tech/badge/pyaml-env)](https://pepy.tech/project/pyaml-env)
+
 # Python YAML configuration with environment variables parsing
 
 ## TL;DR
@@ -42,6 +45,7 @@ print(config)
 }
 
 ```
+
 which can also become this:
 ```python
 from pyaml_env import parse_config, BaseConfig
@@ -51,7 +55,7 @@ config = BaseConfig(parse_config('path/to/config.yaml'))
 print(config.database.url)
 ```
 
-You can also set defaults (e.g. with the default_sep = ':'):
+You can also set defaults using the kwarg `default_sep`. E.g. `default_sep=':'`.
 ```yaml
 databse:
   name: test_db
@@ -61,6 +65,10 @@ databse:
 ```
 And if no environment variables are found then we get:
 ```python
+from pyaml_env import parse_config
+config = parse_config('path/to/config.yaml', default_sep=':')
+
+print(config)
 {
     'database': {
         'name': 'test_db',
@@ -223,3 +231,7 @@ I hope this was helpful. Any thoughts, questions, corrections and suggestions ar
 *A common need when writing an application is loading and saving configuration values in a human-readable text format…*www.devdungeon.com](https://www.devdungeon.com/content/python-configuration-files)
 [**Configuration files in Python**
 *Most interesting programs need some kind of configuration: Content Management Systems like WordPress blogs, WikiMedia…*martin-thoma.com](https://martin-thoma.com/configuration-files-in-python/)
+
+
+
+<a href="https://www.buymeacoffee.com/mkaranasou" target="_blank" style="background: #40DCA5;"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>
