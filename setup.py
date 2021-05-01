@@ -18,7 +18,7 @@ tests_require = [
 ]
 
 setup(name='pyaml_env',
-      version='1.0.2',
+      version='1.0.3',
       description='Provides yaml file parsing with '
                   'environment variable resolution',
       long_description=long_description,
