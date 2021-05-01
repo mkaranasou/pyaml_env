@@ -261,3 +261,69 @@ class TestParseConfig(unittest.TestCase):
             config,
             expected_config
         )
+
+    def test_parse_config_default_separator_var_chars_env_var(self):
+        os.environ[self.env_var1] = 'test'
+        test_data = '''
+        test1:
+            data0: !TEST ${ENV_TAG1:35xV*+/\gPEFGxrg}/somethingelse/${ENV_TAG2}
+            data1:  !TEST ${ENV_TAG2:0.0.0.0}
+        '''
+        config = parse_config(data=test_data, tag='!TEST', default_sep=':')
+
+        expected_config = {
+            'test1': {
+                'data0': 'test/somethingelse/N/A',
+                'data1': '0.0.0.0'
+            }
+        }
+
+        self.assertDictEqual(
+            config,
+            expected_config
+        )
+
+    def test_parse_config_default_separator_strong_password_overwritten_by_env_var(self):
+        os.environ[self.env_var1] = "myWeakPassword"
+
+        test_data = '''
+        test1:
+            data0: !TEST ${ENV_TAG1:NoHtnnmEuluGp2boPvGQkGrXqTAtBvIVz9VRmV65}/somethingelse/${ENV_TAG2}
+            data1:  !TEST ${ENV_TAG2:0.0.0.0}
+        '''
+        config = parse_config(data=test_data, tag='!TEST', default_sep=':')
+
+        expected_config = {
+            'test1': {
+                'data0': 'myWeakPassword/somethingelse/N/A',
+                'data1': '0.0.0.0'
+            }
+        }
+
+        self.assertDictEqual(
+            config,
+            expected_config
+        )
+
+    def test_parse_config_default_separator_two_env_var(self):
+        os.environ[self.env_var1] = "1value"
+        os.environ[self.env_var2] = "2values"
+
+        test_data = '''
+        test1:
+            data0: !TEST ${ENV_TAG1:NoHtnnmEuluGp2boPvGQkGrXqTAtBvIVz9VRmV65}/somethingelse/${ENV_TAG2}
+            data1:  !TEST ${ENV_TAG2:0.0.0.0}
+        '''
+        config = parse_config(data=test_data, tag='!TEST', default_sep=':')
+
+        expected_config = {
+            'test1': {
+                'data0': '1value/somethingelse/2values',
+                'data1': '2values'
+            }
+        }
+
+        self.assertDictEqual(
+            config,
+            expected_config
+        )

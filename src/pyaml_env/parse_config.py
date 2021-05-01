@@ -37,7 +37,7 @@ def parse_config(
     # or ${word:default_value} for e.g. ':' separator
     default_sep_pattern = r'(' + default_sep + '[^}^{]+)?'\
         if default_sep else ''
-    pattern = re.compile(r'.*?\$\{([^}^{]+)' + default_sep_pattern + r'\}.*?')
+    pattern = re.compile(f'.*?\${{(\w+){default_sep_pattern}}}.*?')
     loader = yaml.SafeLoader
 
     # the tag will be used to mark where to start searching for the pattern
