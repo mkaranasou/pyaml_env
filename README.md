@@ -1,3 +1,4 @@
+[![CodeQL](https://github.com/mkaranasou/pyaml_env/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/mkaranasou/pyaml_env/actions/workflows/codeql-analysis.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Downloads](https://pepy.tech/badge/pyaml-env)](https://pepy.tech/project/pyaml-env)
 
