@@ -13,6 +13,10 @@ so that no secrets are kept in text.
 pip install pyaml-env
 ```
 ### How to use:
+
+--- 
+
+#### Basic Usage: Environment variable parsing
 This yaml file:
 ```yaml
 databse:
@@ -47,7 +51,11 @@ print(config)
 
 ```
 
-which can also become this:
+
+---
+
+#### Attribute Access using `BaseConfig`
+Which can also become this:
 ```python
 from pyaml_env import parse_config, BaseConfig
 config = BaseConfig(parse_config('path/to/config.yaml'))
@@ -55,8 +63,12 @@ config = BaseConfig(parse_config('path/to/config.yaml'))
 # I'll explain why this might be useful in a bit.
 print(config.database.url)
 ```
+---
 
-You can also set defaults using the kwarg `default_sep`. E.g. `default_sep=':'`.
+
+#### Default Values with `:`
+You can also set default values for when the environment variables are not set for some reason,
+using the `default_sep` kwarg (**which is `:` by default**) like this:
 ```yaml
 databse:
   name: test_db
@@ -64,10 +76,11 @@ databse:
   password: !ENV ${DB_PASS:meaw2}
   url: !ENV 'http://${DB_BASE_URL:straight_to_production}:${DB_PORT}'
 ```
+
 And if no environment variables are found then we get:
 ```python
 from pyaml_env import parse_config
-config = parse_config('path/to/config.yaml', default_sep=':')
+config = parse_config('path/to/config.yaml')
 
 print(config)
 {
@@ -79,9 +92,13 @@ print(config)
     }
 }
 ```
+**NOTE**: Special characters like `*`, `{` etc. are not currently supported as separators. Let me know if you'd like them handled also.
 
+---
 
-If no defaults are found and no environment variables, the `default_value` is used:
+#### If nothing matches: `N/A` as `default_value`:
+
+If no defaults are found and no environment variables, the `default_value` (**which is `N/A` by default**)  is used:
 ```python
 {
     'database': {
@@ -94,6 +111,16 @@ If no defaults are found and no environment variables, the `default_value` is us
 ```
 Which, of course, means something went wrong and we need to set the correct environment variables.
 If you want this process to fail if a *default value* is not found, you can set the `raise_if_na` flag to `True`.
+For example:
+
+```yaml
+test1:
+    data0: !TEST ${ENV_TAG1:has_default}/somethingelse/${ENV_TAG2:also_has_default}
+    data1:  !TEST ${ENV_TAG2}
+```
+will raise a `ValueError` because `data1:  !TEST ${ENV_TAG2}` there is no default value for `ENV_TAG2` in this line.
+
+--- 
 
 ## Long story: Load a YAML configuration file and resolve any environment variables
 

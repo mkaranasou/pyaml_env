@@ -9,9 +9,11 @@ class TestParseConfig(unittest.TestCase):
         self.env_var1 = 'ENV_TAG1'
         self.env_var2 = 'ENV_TAG2'
         self.env_var3 = 'ENV_TAG3'
+        self.env_var4 = 'ENV*)__TAG101sfdarg'
         os.unsetenv(self.env_var1)
         os.unsetenv(self.env_var2)
         os.unsetenv(self.env_var3)
+        os.unsetenv(self.env_var4)
 
     def tearDown(self):
         if self.env_var1 in os.environ:
@@ -20,11 +22,13 @@ class TestParseConfig(unittest.TestCase):
             del os.environ[self.env_var2]
         if self.env_var3 in os.environ:
             del os.environ[self.env_var3]
+        if self.env_var4 in os.environ:
+            del os.environ[self.env_var4]
 
         if os.path.isfile(self.test_file_name):
             os.remove(self.test_file_name)
 
-    def test_parse_config_with_data(self):
+    def test_parse_config_data(self):
         os.environ[self.env_var1] = 'it works!'
         os.environ[self.env_var2] = 'this works too!'
         test_data = '''
@@ -46,7 +50,7 @@ class TestParseConfig(unittest.TestCase):
             expected_config
         )
 
-    def test_parse_config_with_file_path(self):
+    def test_parse_config_file_path(self):
         os.environ[self.env_var1] = 'it works!'
         os.environ[self.env_var2] = 'this works too!'
         test_data = '''
@@ -93,6 +97,31 @@ class TestParseConfig(unittest.TestCase):
             expected_config
         )
 
+    def test_parse_config_diff_tag_file_path(self):
+        os.environ[self.env_var1] = 'it works!'
+        os.environ[self.env_var2] = 'this works too!'
+        test_data = '''
+        test1:
+            data0: !TEST ${ENV_TAG1}
+            data1:  !TEST ${ENV_TAG2}
+        '''
+        with open(self.test_file_name, 'w') as test_file:
+            test_file.write(test_data)
+
+        config = parse_config(path=self.test_file_name, tag='!TEST')
+
+        expected_config = {
+            'test1': {
+                'data0': 'it works!',
+                'data1': 'this works too!'
+            }
+        }
+
+        self.assertDictEqual(
+            config,
+            expected_config
+        )
+
     def test_parse_config_more_than_one_env_value(self):
         os.environ[self.env_var1] = 'it works!'
         os.environ[self.env_var2] = 'this works too!'
@@ -107,6 +136,136 @@ class TestParseConfig(unittest.TestCase):
             'test1': {
                 'data0': 'it works!/somethingelse/this works too!',
                 'data1': 'this works too!'
+            }
+        }
+
+        self.assertDictEqual(
+            config,
+            expected_config
+        )
+
+    def test_parse_config_more_than_one_env_value_file_path(self):
+        os.environ[self.env_var1] = 'it works!'
+        os.environ[self.env_var2] = 'this works too!'
+        test_data = '''
+        test1:
+            data0: !TEST ${ENV_TAG1}/somethingelse/${ENV_TAG2}
+            data1:  !TEST ${ENV_TAG2}
+        '''
+        with open(self.test_file_name, 'w') as test_file:
+            test_file.write(test_data)
+
+        config = parse_config(path=self.test_file_name, tag='!TEST')
+
+        expected_config = {
+            'test1': {
+                'data0': 'it works!/somethingelse/this works too!',
+                'data1': 'this works too!'
+            }
+        }
+
+        self.assertDictEqual(
+            config,
+            expected_config
+        )
+
+    def test_parse_config_no_default_separator(self):
+        test_data = '''
+        test1:
+            data0: !TEST ${ENV_TAG1:default1}/somethingelse/${ENV_TAG2}
+            data1:  !TEST ${ENV_TAG2:default2}
+        '''
+        config = parse_config(data=test_data, tag='!TEST', default_sep=None)
+
+        expected_config = {
+            'test1': {
+                'data0': 'N/A/somethingelse/N/A',
+                'data1': 'N/A'
+            }
+        }
+
+        self.assertDictEqual(
+            config,
+            expected_config
+        )
+
+    def test_parse_config_default_separator_special_char(self):
+        os.environ[self.env_var1] = 'it works!'
+        os.environ[self.env_var4] = 'this works too!'
+        # default separator exists in the env_var4 name, which should yield a
+        # misread in the environment variable name, which leads to sre_constants.error
+        test_data = '''
+        test1:
+            data0: !TEST ${ENV_TAG1:default1}/somethingelse/${ENV_TAG4}
+            data1:  !TEST ${ENV_TAG4:default2}
+        '''
+
+        import sre_constants
+        with self.assertRaises(sre_constants.error):
+            _ = parse_config(data=test_data, tag='!TEST', default_sep='*')
+        config = parse_config(data=test_data, tag='!TEST', default_sep='\*')
+        expected_config = {
+            'test1': {
+                'data0': 'N/A/somethingelse/N/A',
+                'data1': 'N/A'
+            }
+        }
+        self.assertDictEqual(config, expected_config)
+
+    def test_parse_config_default_separator_special_char_not_resolved(self):
+        os.environ[self.env_var4] = 'this works too!'
+        # default separator exists in the env_var4 name, which should yield a
+        # misread in the environment variable name, which leads to sre_constants.error
+        test_data = '''
+        test1:
+            data0: !TEST ${ENV_TAG1*default1}/somethingelse/${ENV_TAG4}
+            data1:  !TEST ${ENV_TAG4:default2}
+        '''
+
+        import sre_constants
+        with self.assertRaises(sre_constants.error):
+            _ = parse_config(data=test_data, tag='!TEST', default_sep='*')
+        config = parse_config(data=test_data, tag='!TEST', default_sep='\*')
+        expected_config = {
+            'test1': {
+                'data0': 'N/A/somethingelse/N/A',
+                'data1': 'N/A'
+            }
+        }
+        self.assertDictEqual(config, expected_config)
+
+    def test_parse_config_default_value_arg(self):
+        test_data = '''
+        test1:
+            data0: !TEST ${ENV_TAG1:default1}/somethingelse/${ENV_TAG2}
+            data1:  !TEST ${ENV_TAG2:default2}
+        '''
+        config = parse_config(data=test_data, tag='!TEST', default_value='++')
+
+        expected_config = {
+            'test1': {
+                'data0': 'default1/somethingelse/++',
+                'data1': 'default2'
+            }
+        }
+
+        self.assertDictEqual(
+            config,
+            expected_config
+        )
+
+    def test_parse_config_diff_default_separator(self):
+        test_data = '''
+        test1:
+            data0: !TEST ${ENV_TAG1!default1}/somethingelse/${ENV_TAG2}
+            data1:  !TEST ${ENV_TAG2!default2}
+        '''
+        config = parse_config(data=test_data, tag='!TEST', default_sep='!')
+
+        expected_config = {
+            'test1': {
+                'data0': 'default1/somethingelse/N/A',
+                'data1': 'default2'
             }
         }
 
@@ -320,6 +479,51 @@ class TestParseConfig(unittest.TestCase):
             'test1': {
                 'data0': '1value/somethingelse/2values',
                 'data1': '2values'
+            }
+        }
+
+        self.assertDictEqual(
+            config,
+            expected_config
+        )
+
+    def test_parse_config_two_env_var_extra_chars_in_env_var(self):
+        os.environ[self.env_var2] = "1value"
+        os.environ[self.env_var4] = "2values"
+
+        test_data = '''
+        test1:
+          data0: !TEST ${ENV*)__TAG101sfdarg:NoHtnnmEuluGp2boPvGQkGrXqTAtBvIVz.,hujn+000-!!#9VRmV65}/somethingelse/${ENV_TAG2}
+          data1:  !TEST ${ENV_TAG2:0.0.0.0}
+        '''
+        config = parse_config(data=test_data, tag='!TEST', default_sep=':')
+
+        expected_config = {
+            'test1': {
+                'data0': '2values/somethingelse/1value',
+                'data1': '1value'
+            }
+        }
+
+        self.assertDictEqual(
+            config,
+            expected_config
+        )
+
+    def test_parse_config_default_sep_blank_value_error(self):
+        os.environ[self.env_var2] = "1value"
+
+        test_data = '''
+        test1:
+          data0: !TEST ${ENV*)__TAG101sfdarg dsrme__dfweggrsg}/somethingelse/${ENV_TAG2}
+          data1:  !TEST ${ENV_TAG2 0.0.0.0}
+        '''
+        config = parse_config(data=test_data, tag='!TEST', default_sep=' ')
+
+        expected_config = {
+            'test1': {
+                'data0': 'dsrme__dfweggrsg/somethingelse/1value',
+                'data1': '1value'
             }
         }
 
