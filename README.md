@@ -66,7 +66,7 @@ print(config.database.url)
 ---
 
 
-#### Default Values with ':'
+#### Default Values with `:`
 You can also set default values for when the environment variables are not set for some reason,
 using the `default_sep` kwarg (**which is `:` by default**) like this:
 ```yaml
@@ -92,6 +92,7 @@ print(config)
     }
 }
 ```
+**NOTE**: Special characters like `*`, `{` etc. are not currently supported as separators. Let me know if you'd like them handled also.
 
 ---
 
