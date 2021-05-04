@@ -7,7 +7,7 @@ def parse_config(
         path=None,
         data=None,
         tag='!ENV',
-        default_sep=None,
+        default_sep=':',
         default_value='N/A',
         raise_if_na=False
 ):
@@ -33,11 +33,10 @@ def parse_config(
         :return: the dict configuration
         :rtype: dict[str, T]
         """
-    # pattern for global vars: look for ${word}
-    # or ${word:default_value} for e.g. ':' separator
-    default_sep_pattern = r'(' + default_sep + '[^}^{]+)?'\
-        if default_sep else ''
-    pattern = re.compile(f'.*?\${{(\w+){default_sep_pattern}}}.*?')
+    default_sep = default_sep or ''
+    default_sep_pattern = r'(' + default_sep + '[^}^{]+)?' if default_sep else ''
+    pattern = re.compile(
+        r'.*?\$\{([^}{' + default_sep + r']+)' + default_sep_pattern + r'\}.*?')
     loader = yaml.SafeLoader
 
     # the tag will be used to mark where to start searching for the pattern
