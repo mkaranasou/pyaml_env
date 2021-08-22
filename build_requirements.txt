@@ -13,12 +13,5 @@ pylint
 
 # testing
 coverage
-pytest-freezegun
 pytest
-pytest-flask
-pytest-mock
 pytest-cov
-httpretty
-behave
-attrs
-wheel
