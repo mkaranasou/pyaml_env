@@ -1,0 +1,7 @@
+[report]
+show_missing = True
+[run]
+omit =
+    # omit anything in a site-packages directory anywhere
+    */site-packages/*
+    setup.py

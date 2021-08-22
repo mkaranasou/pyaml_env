@@ -1,6 +1,6 @@
 import os
 import unittest
-from pyaml_env import parse_config
+from src.pyaml_env import parse_config
 
 
 class TestParseConfig(unittest.TestCase):

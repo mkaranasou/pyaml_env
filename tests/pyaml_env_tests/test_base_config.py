@@ -1,6 +1,6 @@
 import os
 import unittest
-from pyaml_env import BaseConfig
+from src.pyaml_env import BaseConfig
 
 
 class TestBaseConfig(unittest.TestCase):

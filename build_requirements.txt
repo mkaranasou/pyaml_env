@@ -1,0 +1,24 @@
+-r requirements.txt
+
+# isort
+isort
+
+# static analysis
+autopep8
+bandit
+flake8
+pep8-naming
+pycodestyle
+pylint
+
+# testing
+coverage
+pytest-freezegun
+pytest
+pytest-flask
+pytest-mock
+pytest-cov
+httpretty
+behave
+attrs
+wheel

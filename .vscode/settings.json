@@ -1,0 +1,50 @@
+{
+    "python.pythonPath": "${workspaceFolder}/venv/${workspaceFolderBasename}/bin/python3",
+    "python.linting.pylintEnabled": true,
+    "python.testing.pytestEnabled": true,
+    "python.testing.unittestEnabled": false,
+    "python.testing.unittestArgs": [
+        "-v",
+        "-s",
+        "./tests",
+        "-p",
+        "*_test.py",
+        "test_*.py"
+    ],
+    "python.testing.nosetestsEnabled": false,
+    "python.testing.pytestArgs": [
+        "tests"
+    ],
+    "python.envFile": "${workspaceFolder}/tests/.env",
+    "python.linting.pylintArgs": [
+        // "--load-plugins pylint_flask_sqlalchemy"
+    ],
+    "DockerRun.DisableDockerrc": true,
+    "python.analysis.extraPaths": [
+        "./src"
+    ],
+    "taskExplorer.exclude": [
+        "**/.vscode-test/**",
+        "**/bin/**",
+        "**/build/**",
+        "**/CompiledOutput/**",
+        "**/dist/**",
+        "**/doc/**",
+        "**/ext/**",
+        "**/out/**",
+        "**/output/**",
+        "**/packages/**",
+        "**/release/**",
+        "**/releases/**",
+        "**/samples/**",
+        "**/sdks/**",
+        "**/static/**",
+        "**/target/**",
+        "**/tests/**",
+        "**/third_party/**",
+        "**/vendor/**",
+        "**/work/**",
+        "**/venv/**"
+    ],
+    "pythonTestExplorer.testFramework": "pytest"
+}
