@@ -97,6 +97,46 @@ class TestParseConfig(unittest.TestCase):
             expected_config
         )
 
+    def test_parse_config_no_tag(self):
+        os.environ[self.env_var1] = 'it works!'
+        os.environ[self.env_var2] = 'this works too!'
+        test_data = '''
+        test1:
+            data0: ${ENV_TAG1}
+            data1: ${ENV_TAG2}
+        '''
+        config = parse_config(data=test_data, tag='!TEST')
+
+        expected_config = {
+            'test1': {
+                'data0': '${ENV_TAG1}',
+                'data1': '${ENV_TAG2}'
+            }
+        }
+
+        self.assertDictEqual(
+            config,
+            expected_config
+        )
+        
+    def test_parse_config_different_tag(self):
+        os.environ[self.env_var1] = 'it works!'
+        os.environ[self.env_var2] = 'this works too!'
+        test_data = '''
+        test1:
+            data0: !TEST2 ${ENV_TAG1}
+            data1: !TEST2 ${ENV_TAG2}
+        '''
+        config = parse_config(data=test_data, tag='!TEST')
+
+        expected_config = {
+            'test1': {
+                'data0': '!TEST2 ${ENV_TAG1}',
+                'data1': '!TEST2 ${ENV_TAG2}'
+            }
+        }
+        
+        
     def test_parse_config_diff_tag_file_path(self):
         os.environ[self.env_var1] = 'it works!'
         os.environ[self.env_var2] = 'this works too!'
