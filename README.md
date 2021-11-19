@@ -94,7 +94,9 @@ print(config)
     }
 }
 ```
-**NOTE**: Special characters like `*`, `{` etc. are not currently supported as separators. Let me know if you'd like them handled also.
+**NOTE 0**: Special characters like `*`, `{` etc. are not currently supported as separators. Let me know if you'd like them handled also.
+
+**NOTE 1**: If you set `tag` to `None`, then, the current behavior is that environment variables in all places in the yaml will be resolved (if set).
 
 ---
 
@@ -123,6 +125,39 @@ test1:
 will raise a `ValueError` because `data1:  !TEST ${ENV_TAG2}` there is no default value for `ENV_TAG2` in this line.
 
 --- 
+
+
+#### Using a different loader:
+
+The default yaml loader is `yaml.SafeLoader`. If you need to work with serialized Python objects, 
+you can specify a different loader.
+
+So given a class:
+```python
+class OtherLoadTest:
+    def __init__(self):
+        self.data0 = 'it works!'
+        self.data1 = 'this works too!'
+
+```
+
+Which has become a yaml output like the following using `yaml.dump(OtherLoadTest())`:
+```yaml
+!!python/object:__main__.OtherLoadTest
+data0: it works!
+data1: this works too!
+```
+
+You can use `parse_config` to load the object like this:
+```python
+import yaml
+from pyaml_env import parse_config
+
+other_load_test = parse_config(path='path/to/config.yaml', loader=yaml.UnsafeLoader)
+print(other_load_test)
+<__main__.OtherLoadTest object at 0x7fc38ccd5470>
+```
+---
 
 ## Long story: Load a YAML configuration file and resolve any environment variables
 
