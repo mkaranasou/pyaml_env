@@ -38,8 +38,8 @@ class TestBaseConfig(unittest.TestCase):
         )
         print(base_config.a)
         print(base_config.b)
-        self.assertEquals(self.simple_data['a'], base_config.a)
-        self.assertEquals(self.simple_data['b'], base_config.b)
+        self.assertEqual(self.simple_data['a'], base_config.a)
+        self.assertEqual(self.simple_data['b'], base_config.b)
 
     def test_base_config_complex_structure(self):
         base_config = BaseConfig(self.complex_data)
