@@ -1,6 +1,16 @@
 import os
 import unittest
+
+import yaml
+from yaml.constructor import ConstructorError
+
 from pyaml_env import parse_config
+
+
+class UnsafeLoadTest:
+    def __init__(self):
+        self.data0 = 'it works!'
+        self.data1 = 'this works too!'
 
 
 class TestParseConfig(unittest.TestCase):
@@ -316,11 +326,51 @@ class TestParseConfig(unittest.TestCase):
             expected_config
         )
 
+    def test_parse_config_default_separator_two_env_vars_in_one_line_extra_chars(self):
+        test_data = '''
+        test1:
+            data0: !TEST ${ENV_TAG1:defaul^{t1}/somethingelse/${ENV_TAG2:default2}
+            data1:  !TEST ${ENV_TAG2}
+        '''
+        config = parse_config(data=test_data, tag='!TEST', default_sep=':')
+
+        expected_config = {
+            'test1': {
+                'data0': 'defaul^{t1/somethingelse/default2',
+                'data1': 'N/A'
+            }
+        }
+
+        self.assertDictEqual(
+            config,
+            expected_config
+        )
+
+    def test_parse_config_default_separator_illegal_char_default_value(self):
+        test_data = '''
+        test1:
+            data0: !TEST ${ENV_TAG1:defaul^{}t1}/somethingelse/${ENV_TAG2:default2}
+            data1:  !TEST ${ENV_TAG2}
+        '''
+        config = parse_config(data=test_data, tag='!TEST', default_sep=':')
+
+        expected_config = {
+            'test1': {
+                'data0': 'defaul^{t1}/somethingelse/default2',
+                'data1': 'N/A'
+            }
+        }
+
+        self.assertDictEqual(
+            config,
+            expected_config
+        )
+
     def test_parse_config_default_separator_diff_default_value(self):
         test_data = '''
         test1:
             data0: !TEST ${ENV_TAG1:default1}/somethingelse/${ENV_TAG2:default2}
-            data1:  !TEST ${ENV_TAG2}
+            data1: !TEST ${ENV_TAG2}
         '''
         config = parse_config(
             data=test_data,
@@ -531,3 +581,132 @@ class TestParseConfig(unittest.TestCase):
             config,
             expected_config
         )
+
+    def test_default_loader(self):
+        os.environ[self.env_var1] = 'it works!'
+        os.environ[self.env_var2] = 'this works too!'
+        test_data = '''
+                test1:
+                    data0: !ENV ${ENV_TAG1}
+                    data1: !ENV ${ENV_TAG2}
+                '''
+        config = parse_config(data=test_data, loader=yaml.UnsafeLoader)
+
+        expected_config = {
+            'test1': {
+                'data0': 'it works!',
+                'data1': 'this works too!'
+            }
+        }
+
+        self.assertDictEqual(
+            config,
+            expected_config
+        )
+
+    def test_default_unsafe_loader_no_env_vars(self):
+        unsafe_load_instance = UnsafeLoadTest()
+
+        test_data = '''
+                !!python/object:test_parse_config.UnsafeLoadTest
+                data0: it works!
+                data1: this works too!
+                '''
+        config = parse_config(data=test_data, loader=yaml.UnsafeLoader)
+
+        self.assertIsInstance(
+            config,
+            UnsafeLoadTest
+        )
+        self.assertEqual(config.data0, unsafe_load_instance.data0)
+        self.assertEqual(config.data1, unsafe_load_instance.data1)
+
+    def test_default_unsafe_loader_env_vars(self):
+        os.environ[self.env_var1] = 'it works differently!'
+        os.environ[self.env_var2] = 'this works too, new value!'
+
+        test_data = '''
+                !!python/object:test_parse_config.UnsafeLoadTest
+                data0: !ENV ${ENV_TAG1}
+                data1: !ENV ${ENV_TAG2}
+                '''
+        config = parse_config(data=test_data, loader=yaml.UnsafeLoader)
+
+        self.assertIsInstance(
+            config,
+            UnsafeLoadTest
+        )
+        self.assertEqual(config.data0, os.environ[self.env_var1])
+        self.assertEqual(config.data1, os.environ[self.env_var2])
+
+    def test_default_unsafe_loader_env_vars_default_value(self):
+        os.environ[self.env_var1] = 'it works differently!'
+
+        test_data = '''
+                !!python/object:test_parse_config.UnsafeLoadTest
+                data0: !ENV ${ENV_TAG1}
+                data1: !ENV ${ENV_TAG2:default}
+                '''
+        config = parse_config(data=test_data, loader=yaml.UnsafeLoader)
+
+        self.assertIsInstance(
+            config,
+            UnsafeLoadTest
+        )
+        self.assertEqual(config.data0, os.environ[self.env_var1])
+        self.assertEqual(config.data1, "default")
+
+    def test_parse_config_different_tag(self):
+        os.environ[self.env_var1] = 'it works!'
+        os.environ[self.env_var2] = 'this works too!'
+        test_data = '''
+        test1:
+            data0: !TEST ${ENV_TAG1}
+            data1: !TEST ${ENV_TAG2}
+        '''
+
+        expected = {
+           'test1': {
+               'data0': os.environ[self.env_var1],
+               'data1': os.environ[self.env_var2]
+            }
+        }
+        result = parse_config(data=test_data, tag='!TEST')
+
+        self.assertDictEqual(result, expected)
+
+    def test_parse_config_different_tag_error(self):
+        os.environ[self.env_var1] = 'it works!'
+        os.environ[self.env_var2] = 'this works too!'
+        test_data = '''
+        test1:
+            data0: !TEST2 ${ENV_TAG1}
+            data1: !TEST2 ${ENV_TAG2}
+        '''
+
+        with self.assertRaises(ConstructorError) as ce:
+            _ = parse_config(data=test_data, tag='!TEST')
+
+        self.assertTrue(
+            "could not determine a constructor for the tag '!TEST2'"
+            in str(ce.exception.problem)
+        )
+
+    def test_parse_config_no_tag_all_resolved(self):
+        os.environ[self.env_var1] = 'it works!'
+        os.environ[self.env_var2] = 'this works too!'
+        test_data = '''
+        test1:
+            data0: !TEST2 test1${ENV_TAG1}
+            data1: ${ENV_TAG2}
+        '''
+
+        expected = {
+           'test1': {
+               'data0': f'test1{os.environ[self.env_var1]}',
+               'data1': os.environ[self.env_var2]
+            }
+        }
+        result = parse_config(data=test_data, tag=None)
+
+        self.assertDictEqual(result, expected)

@@ -9,7 +9,8 @@ def parse_config(
         tag='!ENV',
         default_sep=':',
         default_value='N/A',
-        raise_if_na=False
+        raise_if_na=False,
+        loader=yaml.SafeLoader
 ):
     """
         Load yaml configuration from path or from the contents of a file (data)
@@ -25,19 +26,24 @@ def parse_config(
 
         :param str path: the path to the yaml file
         :param str data: the yaml data itself as a stream
-        :param str tag: the tag to look for
+        :param str tag: the tag to look for, if None, all env variables will be
+        resolved.
         :param str default_sep: if any default values are set, use this field
         to separate them from the enironment variable name. E.g. ':' can be
         used.
         :param str default_value: the tag to look for
+        :param bool raise_if_na: raise an exception if there is no default
+        value set for the env variable.
+        :param Type[yaml.loader] loader: Specify which loader to use. Defaults to
+        yaml.SafeLoader
         :return: the dict configuration
         :rtype: dict[str, T]
         """
     default_sep = default_sep or ''
-    default_sep_pattern = r'(' + default_sep + '[^}^{]+)?' if default_sep else ''
+    default_sep_pattern = r'(' + default_sep + '[^}]+)?' if default_sep else ''
     pattern = re.compile(
         r'.*?\$\{([^}{' + default_sep + r']+)' + default_sep_pattern + r'\}.*?')
-    loader = yaml.SafeLoader
+    loader = loader or yaml.SafeLoader
 
     # the tag will be used to mark where to start searching for the pattern
     # e.g. a_key: !ENV somestring${ENV_VAR}other_stuff_follows
