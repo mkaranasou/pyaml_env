@@ -608,7 +608,7 @@ class TestParseConfig(unittest.TestCase):
         unsafe_load_instance = UnsafeLoadTest()
 
         test_data = '''
-                !!python/object:test_parse_config.UnsafeLoadTest
+                !!python/object:tests.pyaml_env_tests.test_parse_config.UnsafeLoadTest
                 data0: it works!
                 data1: this works too!
                 '''
@@ -626,7 +626,7 @@ class TestParseConfig(unittest.TestCase):
         os.environ[self.env_var2] = 'this works too, new value!'
 
         test_data = '''
-                !!python/object:test_parse_config.UnsafeLoadTest
+                !!python/object:tests.pyaml_env_tests.test_parse_config.UnsafeLoadTest
                 data0: !ENV ${ENV_TAG1}
                 data1: !ENV ${ENV_TAG2}
                 '''
@@ -643,7 +643,7 @@ class TestParseConfig(unittest.TestCase):
         os.environ[self.env_var1] = 'it works differently!'
 
         test_data = '''
-                !!python/object:test_parse_config.UnsafeLoadTest
+                !!python/object:tests.pyaml_env_tests.test_parse_config.UnsafeLoadTest
                 data0: !ENV ${ENV_TAG1}
                 data1: !ENV ${ENV_TAG2:default}
                 '''
