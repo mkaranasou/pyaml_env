@@ -90,7 +90,7 @@ def parse_config(
     loader.add_constructor(tag, constructor_env_variables)
 
     if path:
-        with open(path) as conf_data:
+        with open(path, encoding='utf-8') as conf_data:
             return yaml.load(conf_data, Loader=loader)
     elif data:
         return yaml.load(data, Loader=loader)
