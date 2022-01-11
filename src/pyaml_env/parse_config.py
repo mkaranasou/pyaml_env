@@ -40,6 +40,7 @@ def parse_config(
         :rtype: dict[str, T]
         """
     default_sep = default_sep or ''
+    default_value = default_value or ''
     default_sep_pattern = r'(' + default_sep + '[^}]+)?' if default_sep else ''
     pattern = re.compile(
         r'.*?\$\{([^}{' + default_sep + r']+)' + default_sep_pattern + r'\}.*?')
