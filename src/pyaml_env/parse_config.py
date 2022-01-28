@@ -10,7 +10,8 @@ def parse_config(
         default_sep=':',
         default_value='N/A',
         raise_if_na=False,
-        loader=yaml.SafeLoader
+        loader=yaml.SafeLoader,
+        encoding='utf-8'
 ):
     """
         Load yaml configuration from path or from the contents of a file (data)
@@ -36,6 +37,8 @@ def parse_config(
         value set for the env variable.
         :param Type[yaml.loader] loader: Specify which loader to use. Defaults to
         yaml.SafeLoader
+        :param str encoding: the encoding of the data if a path is specified,
+        defaults to utf-8
         :return: the dict configuration
         :rtype: dict[str, T]
         """
@@ -91,7 +94,7 @@ def parse_config(
     loader.add_constructor(tag, constructor_env_variables)
 
     if path:
-        with open(path, encoding='utf-8') as conf_data:
+        with open(path, encoding=encoding) as conf_data:
             return yaml.load(conf_data, Loader=loader)
     elif data:
         return yaml.load(data, Loader=loader)

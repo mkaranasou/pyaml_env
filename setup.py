@@ -14,11 +14,10 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 REQUIREMENTS = [i.strip() for i in open('requirements.txt').readlines()]
 tests_require = [
     'pytest',
-    'mock',
 ]
 
 setup(name='pyaml_env',
-      version='1.1.3',
+      version='1.1.4',
       description='Provides yaml file parsing with '
                   'environment variable resolution',
       long_description=long_description,
