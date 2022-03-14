@@ -5,10 +5,10 @@ from .constructor import PyamlEnvConstructor
 def parse_config(
         path=None,
         data=None,
-        tag='!ENV',
-        default_sep=':',
-        default_value='N/A',
-        raise_if_na=False,
+        tag=PyamlEnvConstructor.DEFAULT_TAG_NAME,
+        default_sep=PyamlEnvConstructor.DEFAULT_SEP,
+        default_value=PyamlEnvConstructor.DEFAULT_VALUE,
+        raise_if_na=PyamlEnvConstructor.DEFAULT_RAISE_IF_NA,
         loader=yaml.SafeLoader,
         encoding='utf-8'
 ):
@@ -48,7 +48,7 @@ def parse_config(
     PyamlEnvConstructor.add_to_loader_class(
         loader_class=loader,
         tag=tag,
-        default_sep=default_sep,
+        sep=default_sep,
         default_value=default_value,
         raise_if_na=raise_if_na
     )

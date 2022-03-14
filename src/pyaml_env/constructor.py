@@ -20,25 +20,27 @@ class PyamlEnvConstructor:
     """
 
     DEFAULT_TAG_NAME = '!ENV'
+    DEFAULT_SEP = ':'
+    DEFAULT_VALUE = 'N/A'
+    DEFAULT_RAISE_IF_NA = False
 
     @classmethod
     def add_to_loader_class(cls,
                             loader_class=None,
                             tag=DEFAULT_TAG_NAME,
-                            default_sep=':',
                             **kwargs):
-        instance = cls(default_sep, **kwargs)
+        instance = cls(**kwargs)
         yaml.add_implicit_resolver(tag, instance.pattern, None, loader_class)
         yaml.add_constructor(tag, instance, loader_class)
         return instance
 
     @property
     def pattern(self):
-        default_sep_pattern = r'(' + self.default_sep + '[^}]+)?' if self.default_sep else ''
-        return re.compile(r'.*?\$\{([^}{' + self.default_sep + r']+)' + default_sep_pattern + r'\}.*?')
+        sep_pattern = r'(' + self.sep + '[^}]+)?' if self.sep else ''
+        return re.compile(r'.*?\$\{([^}{' + self.sep + r']+)' + sep_pattern + r'\}.*?')
 
-    def __init__(self, default_sep=':', default_value='N/A', raise_if_na=False):
-        self.default_sep = default_sep
+    def __init__(self, sep=DEFAULT_SEP, default_value=DEFAULT_VALUE, raise_if_na=DEFAULT_RAISE_IF_NA):
+        self.sep = sep
         self.default_value = default_value
         self.raise_if_na = raise_if_na
 
@@ -60,13 +62,13 @@ class PyamlEnvConstructor:
                 curr_default_value = self.default_value
                 env_var_name = g
                 env_var_name_with_default = g
-                if self.default_sep and isinstance(g, tuple) and len(g) > 1:
+                if self.sep and isinstance(g, tuple) and len(g) > 1:
                     env_var_name = g[0]
                     env_var_name_with_default = ''.join(g)
                     found = False
                     for each in g:
-                        if self.default_sep in each:
-                            _, curr_default_value = each.split(self.default_sep, 1)
+                        if self.sep in each:
+                            _, curr_default_value = each.split(self.sep, 1)
                             found = True
                             break
                     if not found and self.raise_if_na:
