@@ -28,9 +28,11 @@ class PyamlEnvConstructor:
     def add_to_loader_class(cls,
                             loader_class=None,
                             tag=DEFAULT_TAG_NAME,
+                            add_implicit_resolver=False,
                             **kwargs):
         instance = cls(**kwargs)
-        yaml.add_implicit_resolver(tag, instance.pattern, None, loader_class)
+        if add_implicit_resolver:
+            yaml.add_implicit_resolver(tag, instance.pattern, None, loader_class)
         yaml.add_constructor(tag, instance, loader_class)
         return instance
 
