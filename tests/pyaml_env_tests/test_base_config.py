@@ -1,4 +1,3 @@
-import os
 import unittest
 from pyaml_env import BaseConfig
 
