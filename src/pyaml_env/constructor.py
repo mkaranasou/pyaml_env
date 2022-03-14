@@ -37,7 +37,7 @@ class PyamlEnvConstructor:
         default_sep_pattern = r'(' + self.default_sep + '[^}]+)?' if self.default_sep else ''
         return re.compile(r'.*?\$\{([^}{' + self.default_sep + r']+)' + default_sep_pattern + r'\}.*?')
 
-    def __init__(self, default_sep, default_value='N/A', raise_if_na=False):
+    def __init__(self, default_sep=':', default_value='N/A', raise_if_na=False):
         self.default_sep = default_sep
         self.default_value = default_value
         self.raise_if_na = raise_if_na
