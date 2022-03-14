@@ -9,7 +9,7 @@ class PyamlEnvConstructor:
     Call :meth:`add_to_loader_class` or :meth:`yaml.Loader.add_constructor` to
     add it into loader.
 
-    In YAML files, use ``!ENV`` to load other YAML files as below::
+    In YAML files, use ``!ENV`` to resolves the environment variables::
 
         !ENV ${DB_USER:paws}
 
