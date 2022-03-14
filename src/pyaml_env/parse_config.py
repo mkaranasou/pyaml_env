@@ -1,6 +1,5 @@
-import os
-import re
 import yaml
+from .constructor import PyamlEnvConstructor
 
 
 def parse_config(
@@ -44,54 +43,15 @@ def parse_config(
         """
     default_sep = default_sep or ''
     default_value = default_value or ''
-    default_sep_pattern = r'(' + default_sep + '[^}]+)?' if default_sep else ''
-    pattern = re.compile(
-        r'.*?\$\{([^}{' + default_sep + r']+)' + default_sep_pattern + r'\}.*?')
     loader = loader or yaml.SafeLoader
 
-    # the tag will be used to mark where to start searching for the pattern
-    # e.g. a_key: !ENV somestring${ENV_VAR}other_stuff_follows
-    loader.add_implicit_resolver(tag, pattern, None)
-
-    def constructor_env_variables(loader, node):
-        """
-        Extracts the environment variable from the yaml node's value
-        :param yaml.Loader loader: the yaml loader (as defined above)
-        :param node: the current node (key-value) in the yaml
-        :return: the parsed string that contains the value of the environment
-        variable or the default value if defined for the variable. If no value
-        for the variable can be found, then the value is replaced by
-        default_value='N/A'
-        """
-        value = loader.construct_scalar(node)
-        match = pattern.findall(value)  # to find all env variables in line
-        if match:
-            full_value = value
-            for g in match:
-                curr_default_value = default_value
-                env_var_name = g
-                env_var_name_with_default = g
-                if default_sep and  isinstance(g, tuple) and len(g) > 1:
-                    env_var_name = g[0]
-                    env_var_name_with_default = ''.join(g)
-                    found = False
-                    for each in g:
-                        if default_sep in each:
-                            _, curr_default_value = each.split(default_sep, 1)
-                            found = True
-                            break
-                    if not found and raise_if_na:
-                        raise ValueError(
-                            f'Could not find default value for {env_var_name}'
-                        )
-                full_value = full_value.replace(
-                    f'${{{env_var_name_with_default}}}',
-                    os.environ.get(env_var_name, curr_default_value)
-                )
-            return full_value
-        return value
-
-    loader.add_constructor(tag, constructor_env_variables)
+    PyamlEnvConstructor.add_to_loader_class(
+        loader_class=loader,
+        tag=tag,
+        default_sep=default_sep,
+        default_value=default_value,
+        raise_if_na=raise_if_na
+    )
 
     if path:
         with open(path, encoding=encoding) as conf_data:
