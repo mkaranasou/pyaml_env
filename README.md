@@ -164,7 +164,7 @@ print(other_load_test)
 
 Simple way to add !ENV constructor to a pyyaml loader.
 
-```
+```python
 from yaml import Loader
 from pyaml_env import  PyamlEnvConstructor
 
