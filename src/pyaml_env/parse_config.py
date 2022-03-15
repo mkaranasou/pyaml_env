@@ -6,6 +6,7 @@ def parse_config(
         path=None,
         data=None,
         tag=PyamlEnvConstructor.DEFAULT_TAG_NAME,
+        add_implicit_resolver=PyamlEnvConstructor.DEFAULT_ADD_IMPLICIT_RESOLVER,
         default_sep=PyamlEnvConstructor.DEFAULT_SEP,
         default_value=PyamlEnvConstructor.DEFAULT_VALUE,
         raise_if_na=PyamlEnvConstructor.DEFAULT_RAISE_IF_NA,
@@ -28,6 +29,8 @@ def parse_config(
         :param str data: the yaml data itself as a stream
         :param str tag: the tag to look for, if None, all env variables will be
         resolved.
+        :param str add_implicit_resolver: add implicit resolver. All env variables
+        will be resolved.
         :param str default_sep: if any default values are set, use this field
         to separate them from the enironment variable name. E.g. ':' can be
         used.
@@ -44,10 +47,12 @@ def parse_config(
     default_sep = default_sep or ''
     default_value = default_value or ''
     loader = loader or yaml.SafeLoader
+    add_implicit_resolver = True if tag is None else add_implicit_resolver
 
     PyamlEnvConstructor.add_to_loader_class(
         loader_class=loader,
         tag=tag,
+        add_implicit_resolver=add_implicit_resolver,
         sep=default_sep,
         default_value=default_value,
         raise_if_na=raise_if_na

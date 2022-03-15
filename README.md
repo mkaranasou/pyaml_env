@@ -173,6 +173,7 @@ PyamlEnvConstructor.add_to_loader_class(loader_class=Loader)
 PyamlEnvConstructor.add_to_loader_class(
   loader_class=Loader,
   tag=custom_tag,
+  add_implicit_resolver=True,
   sep=custom_sep,
   default_value=custom_default_value,
   raise_if_na=True

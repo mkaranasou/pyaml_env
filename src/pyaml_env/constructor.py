@@ -20,6 +20,7 @@ class PyamlEnvConstructor:
     """
 
     DEFAULT_TAG_NAME = '!ENV'
+    DEFAULT_ADD_IMPLICIT_RESOLVER = False
     DEFAULT_SEP = ':'
     DEFAULT_VALUE = 'N/A'
     DEFAULT_RAISE_IF_NA = False
@@ -28,7 +29,7 @@ class PyamlEnvConstructor:
     def add_to_loader_class(cls,
                             loader_class=None,
                             tag=DEFAULT_TAG_NAME,
-                            add_implicit_resolver=False,
+                            add_implicit_resolver=DEFAULT_ADD_IMPLICIT_RESOLVER,
                             **kwargs):
         instance = cls(**kwargs)
         if add_implicit_resolver:
