@@ -1,3 +1,6 @@
+from typing import Any
+
+
 class BaseConfig:
     """
     A base Config class to get
@@ -20,6 +23,9 @@ class BaseConfig:
             if isinstance(v, dict):
                 self.__dict__[k] = BaseConfig(v)
         return self.__dict__
+
+    def __getattr__(self, field_name: str) -> Any:
+        return self.__dict__[field_name]
 
     @property
     def errors(self):
