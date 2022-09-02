@@ -7,7 +7,7 @@
 # Python YAML configuration with environment variables parsing
 
 ## TL;DR
-A very small library that parses a yaml configuration file and it resolves the environment variables, 
+A very small library that parses a yaml configuration file and it resolves the environment variables,
 so that no secrets are kept in text.
 
 ### Install
@@ -16,7 +16,7 @@ pip install pyaml-env
 ```
 ### How to use:
 
---- 
+---
 
 #### Basic Usage: Environment variable parsing
 This yaml file:
@@ -124,12 +124,12 @@ test1:
 ```
 will raise a `ValueError` because `data1:  !TEST ${ENV_TAG2}` there is no default value for `ENV_TAG2` in this line.
 
---- 
+---
 
 
 #### Using a different loader:
 
-The default yaml loader is `yaml.SafeLoader`. If you need to work with serialized Python objects, 
+The default yaml loader is `yaml.SafeLoader`. If you need to work with serialized Python objects,
 you can specify a different loader.
 
 So given a class:
@@ -157,6 +157,29 @@ other_load_test = parse_config(path='path/to/config.yaml', loader=yaml.UnsafeLoa
 print(other_load_test)
 <__main__.OtherLoadTest object at 0x7fc38ccd5470>
 ```
+
+---
+
+#### Using PyamlEnvConstructor:
+
+Simple way to add !ENV constructor to a pyyaml loader.
+
+```python
+from yaml import Loader
+from pyaml_env import  PyamlEnvConstructor
+
+PyamlEnvConstructor.add_to_loader_class(loader_class=Loader)
+# or
+PyamlEnvConstructor.add_to_loader_class(
+  loader_class=Loader,
+  tag=custom_tag,
+  add_implicit_resolver=True,
+  sep=custom_sep,
+  default_value=custom_default_value,
+  raise_if_na=True
+)
+```
+
 ---
 
 ## Long story: Load a YAML configuration file and resolve any environment variables
@@ -263,7 +286,7 @@ Or even better, so that the password is not echoed in the terminal:
 ```python
 
 # To run this:
-# export DB_PASS=very_secret_and_complex 
+# export DB_PASS=very_secret_and_complex
 # python use_env_variables_in_config_example.py -c /path/to/yaml
 # do stuff with conf, e.g. access the database password like this: conf['database']['DB_PASS']
 
