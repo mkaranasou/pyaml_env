@@ -21,7 +21,7 @@ pip install pyaml-env
 #### Basic Usage: Environment variable parsing
 This yaml file:
 ```yaml
-databse:
+database:
   name: test_db
   username: !ENV ${DB_USER}
   password: !ENV ${DB_PASS}
@@ -99,7 +99,37 @@ print(config)
 **NOTE 1**: If you set `tag` to `None`, then, the current behavior is that environment variables in all places in the yaml will be resolved (if set).
 
 ---
+#### Datatype parsing with yaml's tag:yaml.org,2002:<datatype>
 
+```python
+# because this is not allowed:
+# data1: !TAG !!float ${ENV_TAG2:27017}
+# use tag:yaml.org,2002:datatype to convert value:
+test_data = '''
+        data0: !TAG ${ENV_TAG1}
+        data1: !TAG tag:yaml.org,2002:float ${ENV_TAG2:27017}
+        data2: !!float 1024
+        data3: !TAG ${ENV_TAG2:some_value}
+        data4: !TAG tag:yaml.org,2002:bool ${ENV_TAG2:false}
+        '''
+```
+Will become:
+```python
+os.environ['ENV_TAG1'] = "1024"
+config = parse_config(data=test_data, tag='!TAG')
+print(config)
+{
+    'data0': '1024', 
+    'data1': 27017.0, 
+    'data2': 1024.0, 
+    'data3': 'some_value', 
+    'data4': False
+}
+```
+
+[reference in yaml code](https://github.com/yaml/pyyaml/blob/master/lib/yaml/parser.py#L78)
+
+---
 #### If nothing matches: `N/A` as `default_value`:
 
 If no defaults are found and no environment variables, the `default_value` (**which is `N/A` by default**)  is used:

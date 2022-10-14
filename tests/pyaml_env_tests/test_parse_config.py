@@ -736,3 +736,27 @@ class TestParseConfig(unittest.TestCase):
         result = parse_config(data=test_data, tag=None)
         self.assertDictEqual(result, expected)
 
+        self.assertDictEqual(result, expected)
+
+    def test_numeric_values_with_type_defined(self):
+        os.environ[self.env_var1] = "1024"
+
+        test_data = '''
+                data0: !TAG ${ENV_TAG1}
+                data1: !TAG tag:yaml.org,2002:float ${ENV_TAG2:27017}
+                data2: !!float 1024
+                data3: !TAG ${ENV_TAG2:some_value}
+                data4: !TAG tag:yaml.org,2002:bool ${ENV_TAG2:false}
+                '''
+        config = parse_config(data=test_data, tag='!TAG')
+        print(config)
+        self.assertIsInstance(config['data2'], float)
+        self.assertIsInstance(config['data3'], str)
+        self.assertIsInstance(config['data1'], float)
+        self.assertIsInstance(config['data4'], bool)
+        self.assertIsInstance(config['data0'], str)
+        self.assertEqual(config['data0'], os.environ[self.env_var1])
+        self.assertEqual(config['data2'], float(os.environ[self.env_var1]))
+        self.assertEqual(config['data1'], 27017.0)
+        self.assertEqual(config['data3'], "some_value")
+        self.assertEqual(config['data4'], False)
