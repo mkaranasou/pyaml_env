@@ -51,7 +51,7 @@ def parse_config(
 
     # the tag will be used to mark where to start searching for the pattern
     # e.g. a_key: !ENV somestring${ENV_VAR}other_stuff_follows
-    loader.add_implicit_resolver(tag, pattern, None)
+    loader.add_implicit_resolver(tag, pattern, first=[tag])
 
     def constructor_env_variables(loader, node):
         """
