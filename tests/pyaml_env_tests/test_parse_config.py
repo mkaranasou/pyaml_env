@@ -692,6 +692,31 @@ class TestParseConfig(unittest.TestCase):
             in str(ce.exception.problem)
         )
 
+    def test_parse_config_only_tag_env_vars_resolved(self):
+        os.environ[self.env_var1] = 'it works!'
+        os.environ[self.env_var2] = 'this works too!'
+        test_data = '''
+        test1:
+            data0: !TEST2 test1${ENV_TAG1}
+            data1: ${ENV_TAG2}
+        '''
+
+        expected = {
+           'test1': {
+               'data0': f'test1{os.environ[self.env_var1]}',
+               'data1': '${ENV_TAG2}'
+            }
+        }
+
+        # because None is used as a tag in one of the tests, it messes up expected behavior
+        # remove None from implicit resolvers:
+        if None in yaml.SafeLoader.yaml_implicit_resolvers:
+            del yaml.SafeLoader.yaml_implicit_resolvers[None]
+
+        # only ENV_TAG1 should be parsed because of !TEST2 tag
+        result = parse_config(data=test_data, tag='!TEST2')
+        self.assertDictEqual(result, expected)
+
     def test_parse_config_no_tag_all_resolved(self):
         os.environ[self.env_var1] = 'it works!'
         os.environ[self.env_var2] = 'this works too!'
@@ -709,24 +734,5 @@ class TestParseConfig(unittest.TestCase):
         }
         # all environment variables will be parsed
         result = parse_config(data=test_data, tag=None)
-        self.assertDictEqual(result, expected)
-
-    def test_parse_config_only_tag_env_vars_resolved(self):
-        os.environ[self.env_var1] = 'it works!'
-        os.environ[self.env_var2] = 'this works too!'
-        test_data = '''
-        test1:
-            data0: !TEST2 test1${ENV_TAG1}
-            data1: ${ENV_TAG2}
-        '''
-
-        expected = {
-           'test1': {
-               'data0': f'test1{os.environ[self.env_var1]}',
-               'data1': '${ENV_TAG2}'
-            }
-        }
-        # only ENV_TAG1 should be parsed because of !TEST2 tag
-        result = parse_config(data=test_data, tag='!TEST2')
         self.assertDictEqual(result, expected)
 
