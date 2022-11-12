@@ -51,7 +51,11 @@ def parse_config(
 
     # the tag will be used to mark where to start searching for the pattern
     # e.g. a_key: !ENV somestring${ENV_VAR}other_stuff_follows
-    loader.add_implicit_resolver(tag, pattern, None)
+    loader.add_implicit_resolver(tag, pattern, first=[tag])
+
+    # For inner type conversions because double tags do not work, e.g. !ENV !!float
+    type_tag = 'tag:yaml.org,2002:'
+    type_tag_pattern = re.compile(f'({type_tag}\w+\s)')
 
     def constructor_env_variables(loader, node):
         """
@@ -65,13 +69,15 @@ def parse_config(
         """
         value = loader.construct_scalar(node)
         match = pattern.findall(value)  # to find all env variables in line
+        dt = ''.join(type_tag_pattern.findall(value)) or ''
+        value = value.replace(dt, '')
         if match:
             full_value = value
             for g in match:
                 curr_default_value = default_value
                 env_var_name = g
                 env_var_name_with_default = g
-                if default_sep and  isinstance(g, tuple) and len(g) > 1:
+                if default_sep and isinstance(g, tuple) and len(g) > 1:
                     env_var_name = g[0]
                     env_var_name_with_default = ''.join(g)
                     found = False
@@ -88,7 +94,13 @@ def parse_config(
                     f'${{{env_var_name_with_default}}}',
                     os.environ.get(env_var_name, curr_default_value)
                 )
+                if dt:
+                    # do one more roundtrip with the dt constructor:
+                    node.value = full_value
+                    node.tag = dt.strip()
+                    return loader.yaml_constructors[node.tag](loader, node)
             return full_value
+
         return value
 
     loader.add_constructor(tag, constructor_env_variables)

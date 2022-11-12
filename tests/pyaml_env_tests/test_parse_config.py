@@ -692,6 +692,31 @@ class TestParseConfig(unittest.TestCase):
             in str(ce.exception.problem)
         )
 
+    def test_parse_config_only_tag_env_vars_resolved(self):
+        os.environ[self.env_var1] = 'it works!'
+        os.environ[self.env_var2] = 'this works too!'
+        test_data = '''
+        test1:
+            data0: !TEST2 test1${ENV_TAG1}
+            data1: ${ENV_TAG2}
+        '''
+
+        expected = {
+           'test1': {
+               'data0': f'test1{os.environ[self.env_var1]}',
+               'data1': '${ENV_TAG2}'
+            }
+        }
+
+        # because None is used as a tag in one of the tests, it messes up expected behavior
+        # remove None from implicit resolvers:
+        if None in yaml.SafeLoader.yaml_implicit_resolvers:
+            del yaml.SafeLoader.yaml_implicit_resolvers[None]
+
+        # only ENV_TAG1 should be parsed because of !TEST2 tag
+        result = parse_config(data=test_data, tag='!TEST2')
+        self.assertDictEqual(result, expected)
+
     def test_parse_config_no_tag_all_resolved(self):
         os.environ[self.env_var1] = 'it works!'
         os.environ[self.env_var2] = 'this works too!'
@@ -704,9 +729,34 @@ class TestParseConfig(unittest.TestCase):
         expected = {
            'test1': {
                'data0': f'test1{os.environ[self.env_var1]}',
-               'data1': os.environ[self.env_var2]
+               'data1': 'this works too!'
             }
         }
+        # all environment variables will be parsed
         result = parse_config(data=test_data, tag=None)
+        self.assertDictEqual(result, expected)
 
         self.assertDictEqual(result, expected)
+
+    def test_numeric_values_with_type_defined(self):
+        os.environ[self.env_var1] = "1024"
+
+        test_data = '''
+                data0: !TAG ${ENV_TAG1}
+                data1: !TAG tag:yaml.org,2002:float ${ENV_TAG2:27017}
+                data2: !!float 1024
+                data3: !TAG ${ENV_TAG2:some_value}
+                data4: !TAG tag:yaml.org,2002:bool ${ENV_TAG2:false}
+                '''
+        config = parse_config(data=test_data, tag='!TAG')
+        print(config)
+        self.assertIsInstance(config['data2'], float)
+        self.assertIsInstance(config['data3'], str)
+        self.assertIsInstance(config['data1'], float)
+        self.assertIsInstance(config['data4'], bool)
+        self.assertIsInstance(config['data0'], str)
+        self.assertEqual(config['data0'], os.environ[self.env_var1])
+        self.assertEqual(config['data2'], float(os.environ[self.env_var1]))
+        self.assertEqual(config['data1'], 27017.0)
+        self.assertEqual(config['data3'], "some_value")
+        self.assertEqual(config['data4'], False)
