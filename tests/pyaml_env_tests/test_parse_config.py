@@ -582,6 +582,18 @@ class TestParseConfig(unittest.TestCase):
             expected_config
         )
 
+    def test_parse_config_raise_if_missing_raised(self):
+        test_data = 'data0: !TAG ${ENV_TAG1}'
+        self.assertRaises(ValueError, parse_config, data=test_data, tag='!TAG',
+                          raise_if_missing=True)
+
+    def test_parse_config_raise_if_missing_not_raised(self):
+        default_value = 'default_value'
+        test_data = f'data0: !TAG ${{ENV_TAG1:{default_value}}}'
+        config = parse_config(data=test_data, tag='!TAG',
+                              raise_if_missing=True)
+        self.assertEqual(config['data0'], default_value)
+
     def test_default_loader(self):
         os.environ[self.env_var1] = 'it works!'
         os.environ[self.env_var2] = 'this works too!'
