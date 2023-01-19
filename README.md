@@ -4,6 +4,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Upload Python Package](https://github.com/mkaranasou/pyaml_env/actions/workflows/python-publish.yml/badge.svg)](https://github.com/mkaranasou/pyaml_env/actions/workflows/python-publish.yml)
 
+<a href="https://www.buymeacoffee.com/mkaranasou" target="_blank" style="background: #40DCA5;"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>
+
 # Python YAML configuration with environment variables parsing
 
 ## TL;DR
@@ -327,6 +329,3 @@ I hope this was helpful. Any thoughts, questions, corrections and suggestions ar
 [**Configuration files in Python**
 *Most interesting programs need some kind of configuration: Content Management Systems like WordPress blogs, WikiMedia…*martin-thoma.com](https://martin-thoma.com/configuration-files-in-python/)
 
-
-
-<a href="https://www.buymeacoffee.com/mkaranasou" target="_blank" style="background: #40DCA5;"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>
