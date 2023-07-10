@@ -11,7 +11,8 @@ def parse_config(
         default_value='N/A',
         raise_if_na=False,
         loader=yaml.SafeLoader,
-        encoding='utf-8'
+        encoding='utf-8',
+        raise_if_missing=False
 ):
     """
         Load yaml configuration from path or from the contents of a file (data)
@@ -39,6 +40,8 @@ def parse_config(
         yaml.SafeLoader
         :param str encoding: the encoding of the data if a path is specified,
         defaults to utf-8
+        :param bool raise_if_missing: raise a ValueError when an env variable
+        is not set and no default value is given
         :return: the dict configuration
         :rtype: dict[str, T]
         """
@@ -86,10 +89,15 @@ def parse_config(
                             _, curr_default_value = each.split(default_sep, 1)
                             found = True
                             break
-                    if not found and raise_if_na:
-                        raise ValueError(
-                            f'Could not find default value for {env_var_name}'
-                        )
+                    if not found:
+                        if raise_if_na:
+                            raise ValueError(f'Could not find default value '
+                                             f'for {env_var_name}')
+                        if raise_if_missing and env_var_name not in os.environ:
+                            raise ValueError(f'Could not find env variable '
+                                             f'{env_var_name} and no default '
+                                             f'is set')
+
                 full_value = full_value.replace(
                     f'${{{env_var_name_with_default}}}',
                     os.environ.get(env_var_name, curr_default_value)
