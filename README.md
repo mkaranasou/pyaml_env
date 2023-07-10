@@ -1,4 +1,5 @@
 [![Downloads](https://static.pepy.tech/personalized-badge/pyaml-env?period=total&units=none&left_color=black&right_color=green&left_text=Downloads)](https://pepy.tech/project/pyaml-env)
+[![Downloads](https://static.pepy.tech/badge/pyaml-env/week)](https://pepy.tech/project/pyaml-env)
 [![Tests and linting](https://github.com/mkaranasou/pyaml_env/actions/workflows/python-app.yml/badge.svg)](https://github.com/mkaranasou/pyaml_env/actions/workflows/python-app.yml)
 [![CodeQL](https://github.com/mkaranasou/pyaml_env/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/mkaranasou/pyaml_env/actions/workflows/codeql-analysis.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
