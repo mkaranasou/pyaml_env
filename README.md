@@ -157,9 +157,26 @@ test1:
 ```
 will raise a `ValueError` because `data1:  !TEST ${ENV_TAG2}` there is no default value for `ENV_TAG2` in this line.
 
---- 
+---
+#### Raise an exception on missing environment variable without default
 
+Often, a proper default value for an environment variable doesn't exist and
+an exception should be thrown when the environment variable is not set.
 
+If you want config parsing to fail if the environment variable is missing 
+and no *default value* is specified, you can set the `raise_if_missing`
+flag to `True`.
+
+For example:
+
+```yaml
+test1:
+    data1: !TEST ${ENV_TAG2}
+```
+will raise a `ValueError` when `ENV_TAG2` is missing because no default is set
+explicitly. 
+
+---
 #### Using a different loader:
 
 The default yaml loader is `yaml.SafeLoader`. If you need to work with serialized Python objects, 
