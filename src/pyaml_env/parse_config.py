@@ -55,7 +55,7 @@ def parse_config(
 
     # For inner type conversions because double tags do not work, e.g. !ENV !!float
     type_tag = 'tag:yaml.org,2002:'
-    type_tag_pattern = re.compile(f'({type_tag}\w+\s)')
+    type_tag_pattern = re.compile(rf'({type_tag}\w+\s)')
 
     def constructor_env_variables(loader, node):
         """
