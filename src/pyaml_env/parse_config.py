@@ -49,6 +49,11 @@ def parse_config(
         r'.*?\$\{([^}{' + default_sep + r']+)' + default_sep_pattern + r'\}.*?')
     loader = loader or yaml.SafeLoader
 
+    # Register the !ENV tag on a per-call subclass, not on the caller's
+    # loader class: add_constructor/add_implicit_resolver would otherwise
+    # teach yaml.SafeLoader itself the tag for the rest of the process.
+    loader = type('EnvLoader', (loader,), {})
+
     # the tag will be used to mark where to start searching for the pattern
     # e.g. a_key: !ENV somestring${ENV_VAR}other_stuff_follows
     loader.add_implicit_resolver(tag, pattern, first=[tag])
